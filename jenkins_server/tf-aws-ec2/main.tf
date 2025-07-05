@@ -4,6 +4,7 @@
 # Creating a VPC
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
+  version = "~> 5.1.0"
 
   name = var.vpc_name
   cidr = var.vpc_cidr
@@ -88,12 +89,13 @@ module "sg" {
 # EC2
 module "ec2_instance" {
   source = "terraform-aws-modules/ec2-instance/aws"
+  version = "~> 5.8.0"
 
   name = var.jenkins_ec2_instance
 
   instance_type               = var.instance_type
-  ami                         = "ami-0e8a34246278c21e4"
-  key_name                    = "jenkins_server_keypair"
+  ami                         = "ami-0daee08993156ca1a"
+  key_name                    = "new-ec2-key"
   monitoring                  = true
   vpc_security_group_ids      = [module.sg.security_group_id]
   subnet_id                   = module.vpc.public_subnets[0]
@@ -102,8 +104,9 @@ module "ec2_instance" {
   availability_zone           = data.aws_availability_zones.azs.names[0]
 
   tags = {
-    Name        = "Jenkins-Server"
+    Name        = "jenkins"
     Terraform   = "true"
     Environment = "dev"
+    cost        = "eks-dev-jenkins-server"
   }
 }

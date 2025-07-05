@@ -1,10 +1,10 @@
-aws_region = "us-east-1"
-aws_account_id = "enter_your_account_id"
-backend_jenkins_bucket = "jenkins-terraform-state-7001"
+aws_region = "ap-northeast-2"
+aws_account_id = "533267419021"
+backend_jenkins_bucket = "terraform-eks-cicd-namkj0428"
 backend_jenkins_bucket_key = "jenkins/terraform.tfstate"
 vpc_name       = "jenkins-vpc"
-vpc_cidr       = "10.0.0.0/16"
-public_subnets = ["10.0.1.0/24"]
-instance_type  = "t2.large"
-jenkins_ec2_instance = "Jenkins-Build-Server"
+vpc_cidr       = "11.12.0.0/16"
+public_subnets = ["11.12.1.0/24"]
+instance_type  = "t3a.small"
+jenkins_ec2_instance = "jenkins-server"
 jenkins_security_group = "jenkins-sg"
