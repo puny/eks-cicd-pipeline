@@ -62,6 +62,13 @@ module "sg" {
       protocol    = "tcp"
       description = "SSH"
       cidr_blocks = "0.0.0.0/0"
+    },    
+    {
+      from_port   = 1024
+      to_port     = 1024
+      protocol    = "tcp"
+      description = "SSH"
+      cidr_blocks = "0.0.0.0/0"
     },
     {
       from_port   = 9000
@@ -83,30 +90,5 @@ module "sg" {
 
   tags = {
     Name = "jenkins-sg"
-  }
-}
-
-# EC2
-module "ec2_instance" {
-  source = "terraform-aws-modules/ec2-instance/aws"
-  version = "~> 5.8.0"
-
-  name = var.jenkins_ec2_instance
-
-  instance_type               = var.instance_type
-  ami                         = "ami-0daee08993156ca1a"
-  key_name                    = "new-ec2-key"
-  monitoring                  = true
-  vpc_security_group_ids      = [module.sg.security_group_id]
-  subnet_id                   = module.vpc.public_subnets[0]
-  associate_public_ip_address = true
-  user_data                   = file("../scripts/install_build_tools.sh")
-  availability_zone           = data.aws_availability_zones.azs.names[0]
-
-  tags = {
-    Name        = "jenkins"
-    Terraform   = "true"
-    Environment = "dev"
-    cost        = "eks-dev-jenkins-server"
   }
 }

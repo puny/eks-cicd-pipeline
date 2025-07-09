@@ -13,18 +13,18 @@ module "eks" {
   subnet_ids               = module.vpc.private_subnets
 
 
-  # eks_managed_node_groups = {
-  #   nodes = {
-  #     min_size     = 0
-  #     max_size     = 3
-  #     desired_size = 0
+  eks_managed_node_groups = {
+    nodes = {
+      min_size     = 1
+      max_size     = 3
+      desired_size = 1
 
-  #     # instance_types = ["t2.small"]
-  #     instance_type = var.instance_type
-  #     capacity_type  = "SPOT"
-  #     # capacity_type = "ON_DEMAND"
-  #   }
-  # }
+      # instance_types = ["t2.small"]
+      instance_type = var.instance_type
+      capacity_type  = "SPOT"
+      # capacity_type = "ON_DEMAND"
+    }
+  }
 
   tags = {
     cost = "workshop-eks-cicd-pipeline"

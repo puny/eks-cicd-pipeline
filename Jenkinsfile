@@ -54,7 +54,7 @@ pipeline{
             steps{
                 script{
                     dir('manifest') {
-                        sh 'aws eks update-kubeconfig --name my-eks-cluster'
+                        sh 'aws eks update-kubeconfig --name eks-cicd-cluster'
                         sh 'kubectl create namespace eks-nginx-app'
                         sh 'kubectl apply -f deployment.yaml -n eks-nginx-app'
                         sh 'kubectl apply -f service.yaml -n eks-nginx-app'
