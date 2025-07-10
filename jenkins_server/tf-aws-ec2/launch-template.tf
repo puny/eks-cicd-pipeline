@@ -2,8 +2,8 @@
 resource "aws_launch_template" "jenkins_launch_template" {
   name_prefix   = "spot-jenkins-launch-template-"
   image_id      = "ami-03e38f46f79020a70"
-  instance_type = "t3a.medium"
-  key_name      = "new-ec2-key"
+  instance_type = var.instance_type
+  key_name      = var.key_name
 #   user_data     = file("../scripts/install_build_tools.sh")
 
   block_device_mappings {

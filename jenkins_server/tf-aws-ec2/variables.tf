@@ -47,3 +47,8 @@ variable "jenkins_ec2_instance" {
   description = "Instance Type"
   type        = string
 }
+
+variable "key_name" {
+  description = "Key Name for EC2 Instance"
+  type        = string
+}

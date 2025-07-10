@@ -2,8 +2,8 @@
 
 resource "aws_instance" "jenkins_ec2" {
   ami                         = aws_launch_template.jenkins_launch_template.image_id
-  instance_type               = var.instance_type
-  # key_name                    = "new-ec2-key"
+  key_name                    = aws_launch_template.jenkins_launch_template.key_name
+  instance_type               = aws_launch_template.jenkins_launch_template.instance_type
   monitoring                  = true
   instance_market_options {
     market_type = "spot"

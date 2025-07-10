@@ -2,6 +2,7 @@ aws_region = "ap-northeast-2"
 aws_account_id = "533267419021"
 backend_jenkins_bucket = "terraform-eks-cicd-namkj0428"
 backend_jenkins_bucket_key = "jenkins/terraform.tfstate"
+key_name       = "new-ec2-key"
 vpc_name       = "jenkins-vpc"
 vpc_cidr       = "11.11.0.0/16"
 public_subnets = ["11.11.1.0/28", "11.11.1.240/28"]
