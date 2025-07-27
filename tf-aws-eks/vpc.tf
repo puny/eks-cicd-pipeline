@@ -15,21 +15,21 @@ module "vpc" {
 
   enable_dns_hostnames = true
   # enable_nat_gateway = false
-  # single_nat_gateway = true
+  single_nat_gateway = true
 
   tags = {
-    "kubernetes.io/cluster/my-eks-cluster" = "shared"
+    "kubernetes.io/cluster/eks-cicd-cluster" = "shared"
     Terraform   = "true"
     Environment = "dev"
   }
 
   public_subnet_tags = {
-    "kubernetes.io/cluster/my-eks-cluster" = "shared"
+    "kubernetes.io/cluster/eks-cicd-cluster" = "shared"
     "kubernetes.io/role/elb" = 1
   }
 
   private_subnet_tags = {
-    "kubernetes.io/cluster/my-eks-cluster" = "shared"
+    "kubernetes.io/cluster/eks-cicd-cluster" = "shared"
     "kubernetes.io/role/internal-elb" = 1
   }
 }
