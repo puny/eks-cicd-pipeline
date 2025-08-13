@@ -1,0 +1,38 @@
+
+defaultRules:
+  rules:
+    alertmanager: true
+    etcd: true
+
+alertmanager:
+  service:
+    type: NodePort
+
+kubeApiServer:
+  enabled: true
+
+kubelet:
+  enabled: true
+
+prometheus:
+  thanosService:
+    enabled: false 
+
+  serviceMonitorSelectorNilUsesHelmValues: false 
+
+  service:
+    type: NodePort  
+
+  retention: 5d  
+
+  retentionSize: "10GiB" 
+
+  storageSpec:
+    volumeClaimTemplate:
+      spec:
+        storageClassName: gp2  
+        accessModes: 
+          - ReadWriteOnce  
+        resources:
+          requests:
+            storage: 15Gi

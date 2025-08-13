@@ -1,0 +1,18 @@
+# controller:
+#   serviceType: NodePort
+#   installPlugins:
+#     - kubernetes:4152.v6898000b_e395
+#     - workflow-aggregator:2.6
+#     - git:4.11.5
+#     - pipeline-stage-view:2.26
+
+controller:
+  serviceType: LoadBalancer
+
+persistence:
+  enabled: true
+  existingClaim: "jenkins"
+  storageClass: "gp2"
+  accessMode: ReadWriteOnce
+  size: 5Gi
+  mountPath: /data

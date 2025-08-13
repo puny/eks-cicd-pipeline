@@ -1,0 +1,4 @@
+spec:
+  container:
+    - name: app
+    - image: nginx

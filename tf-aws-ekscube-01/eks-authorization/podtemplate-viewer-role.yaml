@@ -1,0 +1,8 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: podtemplate-viewer-role
+rules:
+- apiGroups: [""] # podtemplates는 core API 그룹("")에 속합니다.
+  resources: ["podtemplates"]
+  verbs: ["get", "list", "watch"]
