@@ -14,16 +14,23 @@ module "eks" {
   # authentication_mode = "API_AND_CONFIG_MAP"
     
   addons = {
-    coredns                = {}
+    coredns                = {
+      most_recent = true
+    }
     eks-pod-identity-agent = {
       before_compute = true
+      most_recent = true      
     }
-    kube-proxy             = {}
+    kube-proxy             = {
+      most_recent = true
+    }
     vpc-cni                = {
       before_compute = true
+      most_recent = true
     }
   }
   
+  enable_irsa = true
   
   # Optional
   endpoint_public_access = true
@@ -36,6 +43,16 @@ module "eks" {
   #   enabled    = true
   #   node_pools = ["general-purpose"]
   # }
+
+  # aws-auth ConfigMap 매핑
+  # manage_aws_auth_configmap = true
+  # map_roles = [
+  #   {
+  #     rolearn  = "arn:aws:iam::533267419021:role/air-dev-assume-workshop-role"
+  #     username = "eks-admin"
+  #     groups   = ["system:masters"]
+  #   }
+  # ]
 
   eks_managed_node_groups = {
     nodes = {

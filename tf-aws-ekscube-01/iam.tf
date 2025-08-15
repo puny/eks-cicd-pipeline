@@ -55,6 +55,38 @@ resource "aws_iam_role" "eks_node_role" {
   })
 }
 
+# ------------------------------
+# IAM Policy for aws-load-balancer-controller
+# ------------------------------
+resource "aws_iam_policy" "alb_controller_policy" {
+  name        = "AWSLoadBalancerControllerIAMPolicy"
+  description = "Policy for AWS Load Balancer Controller"
+  policy      = file("${path.module}/iam_policy.json")
+}
+
+# ------------------------------
+# IRSA (ServiceAccount + Role)
+# ------------------------------
+resource "aws_iam_role" "alb_controller_role" {
+  name                = "AmazonEKSLoadBalancerContrllerRole"
+  assume_role_policy  = data.aws_iam_policy_document.alb_controller_assume_role.json
+}
+
+resource "aws_iam_role_policy_attachment" "alb_controller_attach" {
+  role        = aws_iam_role.alb_controller_role.name
+  policy_arn  = aws_iam_policy.alb_controller_policy.arn
+}
+
+resource "kubernetes_service_account" "alb_controller" {
+  metadata {
+    name        = "aws-load-balancer-controller"
+    namespace   = "kube-system"
+    annotations = {
+      "eks.amazonaws.com/role-arn" = aws_iam_role.alb_controller_role.arn
+    }
+  }
+}
+
 resource "aws_iam_role_policy_attachment" "eks_node_policy_1" {
   role = aws_iam_role.eks_node_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
