@@ -3,11 +3,13 @@
 # Helm Install aws-load-balancer-controller
 # ------------------------------
 
+/* 
 resource "helm_release" "alb_controller" {
   depends_on = [    
-    module.eks,
     module.vpc,
-    aws_iam_role_policy_attachment.alb_controller_attach
+    kubernetes_service_account.alb_controller,
+    aws_iam_role_policy_attachment.alb_controller_attach,    
+    data.aws_eks_cluster_auth.cluster,
   ]
 
   name        = "aws-load-balancer-controller"
@@ -35,4 +37,4 @@ resource "helm_release" "alb_controller" {
     name = "vpcId"
     value = module.vpc.vpc_id
   }
-}
+} */
