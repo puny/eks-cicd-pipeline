@@ -4,14 +4,25 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 21.0.4"
 
-  name    = var.eks_cluster_name
-  iam_role_arn = aws_iam_role.eks_cluster_role.arn
-  kubernetes_version = var.eks_cluster_version
-  subnet_ids      = module.vpc.private_subnets
-  vpc_id          = module.vpc.vpc_id
-  authentication_mode = "API"
+  name                = var.eks_cluster_name
+  iam_role_arn        = aws_iam_role.eks_cluster_role.arn
+  kubernetes_version  = var.eks_cluster_version
+  subnet_ids          = module.vpc.private_subnets
+  vpc_id              = module.vpc.vpc_id
   # configmap & api 
+  authentication_mode   = "API"
   # authentication_mode = "API_AND_CONFIG_MAP"
+
+  # service account 직접정의
+  /* 
+  service_accounts = {
+    aws_load_balancer_controller = {
+      name = "aws-load-balancer-controller"
+      namespace = "kube-system"
+
+      role_name_prefix = "alb-controller-"
+    } 
+  } */
     
   addons = {
     coredns                = {
@@ -30,11 +41,14 @@ module "eks" {
     }
   }
   
+  # IRSA 활성화
+  # OIDC provider 자동으로 생성됨
   enable_irsa = true
   
   # Optional
   endpoint_public_access = true
-  endpoint_public_access_cidrs = [ "0.0.0.0/0" ]
+  # endpoint_public_access_cidrs = [ "0.0.0.0/0" ]
+  endpoint_private_access = true
 
   # Optional: Adds the current caller identity as an administrator via cluster access entry
   enable_cluster_creator_admin_permissions = true
@@ -59,9 +73,9 @@ module "eks" {
       
       iam_role_arn = aws_iam_role.eks_node_role.arn
 
+      desired_size = 1
       min_size = 1
       max_size = 3
-      desired_capacity = 1
 
       ami_type       = "AL2023_x86_64_STANDARD"
       instance_types = [var.instance_type]

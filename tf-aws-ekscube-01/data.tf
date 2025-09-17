@@ -20,3 +20,10 @@ data "aws_iam_policy_document" "alb_controller_assume_role" {
     }
   }
 }
+
+# ----------------------------------------------------------
+# IAM Policy for AWS Load Balancer Controller
+# ----------------------------------------------------------
+data "http" "aws_lb_controller_policy" {
+  url = "https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.8.1/docs/install/iam_policy.json"
+}

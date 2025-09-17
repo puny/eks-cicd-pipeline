@@ -63,7 +63,7 @@ resource "aws_iam_role" "eks_node_role" {
 resource "aws_iam_policy" "alb_controller_policy" {
   name        = "AWSLoadBalancerControllerIAMPolicy"
   description = "Policy for AWS Load Balancer Controller"
-  policy      = file("${path.module}/iam_policy.json")
+  policy      = file("${path.module}/iam-policy.json")
 }
 
 # ------------------------------

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+helm uninstall aws-load-balancer-controller -n kube-system
