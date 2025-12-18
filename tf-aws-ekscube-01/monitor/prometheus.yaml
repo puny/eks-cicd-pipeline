@@ -30,7 +30,7 @@ prometheus:
   storageSpec:
     volumeClaimTemplate:
       spec:
-        storageClassName: gp2  
+        storageClassName: gp3  
         accessModes: 
           - ReadWriteOnce  
         resources:

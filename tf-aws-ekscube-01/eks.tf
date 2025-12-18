@@ -83,6 +83,7 @@ module "eks" {
       tags = {
         Name = "${var.eks_cluster_name}-node"
         cost = "${var.eks_cluster_name}-node"
+        changed_by = "terraform"
       }
     }
   }
