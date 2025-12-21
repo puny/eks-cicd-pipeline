@@ -5,8 +5,9 @@ metadata:
   namespace: jenkins
 spec:
   accessModes:
-    - ReadWriteOnce
+  - ReadWriteOnce
   resources:
     requests:
-      storage: 20Gi
-  storageClassName: gp2
+      storage: 8Gi
+  volumeMode: Filesystem
+  storageClassName: gp3

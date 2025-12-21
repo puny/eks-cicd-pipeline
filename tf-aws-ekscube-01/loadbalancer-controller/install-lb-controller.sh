@@ -13,7 +13,7 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set clusterName=eks-cicd-cluster \
   --set serviceAccount.create=false \
   --set serviceAccount.name=aws-load-balancer-controller \
-  --set vpcId=vpc-0774fd3dceeb3409d \
+  --set vpcId=vpc-036651364771ae245 \
   --set region=ap-northeast-2 \
   --version 1.13.0
   # --set region=ap-northeast-2 \

@@ -1,0 +1,11 @@
+controller:
+  serviceType: NodePort
+  
+persistence:
+  existingClaim: jenkins-pvc
+  
+storageClass:
+
+serviceAccount:
+  create: false
+  name: jenkins
