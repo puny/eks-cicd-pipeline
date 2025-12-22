@@ -34,3 +34,26 @@ eksctl create iamserviceaccount \
     --region ap-northeast-2 \
     --approve
 
+## service account create end ##
+
+## loadbalancer controller create start ##
+
+helm repo add eks https://aws.github.io/eks-charts
+
+# helm eks repo update
+helm repo update eks
+
+VPC_ID=$(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=eks-cluster-vpc" --query "Vpcs[0].VpcId" --output text)
+
+# Install AWS Load Balancer Controller
+# cluster-name, service-account, and region need to be updated
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=eks-cicd-cluster \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --set vpcId=$VPC_ID \
+  --set region=ap-northeast-2 \
+  --version 1.13.0
+
+
