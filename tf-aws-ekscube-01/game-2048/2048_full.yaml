@@ -13,7 +13,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: app-2048
-  replicas: 1
+  replicas: 2 
   template:
     metadata:
       labels:
@@ -48,6 +48,8 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/tags: cost=eks-cicd-cluster-game-2048-ingress,Name=eks-cicd-cluster-game-2048-ingress
+    
 spec:
   ingressClassName: alb  
   rules:

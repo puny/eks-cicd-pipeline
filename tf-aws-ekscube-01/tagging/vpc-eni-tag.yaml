@@ -1,0 +1,3 @@
+env:
+  - name: AWS_VPC_K8S_CNI_ENI_TAGS
+    value: '{"cost":"eks-cicd-cluster-eni","changed_by":"terraform"}'

@@ -9,6 +9,7 @@ metadata:
     # kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/tags: cost=eks-cicd-cluster-demo-flask-backend-ingress,Name=eks-cicd-cluster-demo-flask-backend-ingress
 
 spec:
   ingressClassName: alb

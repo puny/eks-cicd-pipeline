@@ -27,3 +27,13 @@ data "aws_iam_policy_document" "alb_controller_assume_role" {
 data "http" "aws_lb_controller_policy" {
   url = "https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.8.1/docs/install/iam_policy.json"
 }
+
+
+data "http" "lb_controller_policy_json" {
+  url = "https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.13.3/docs/install/iam_policy.json"
+
+  # 선택 사항: 요청 헤더 설정 (필요한 경우)
+  request_headers = {
+    Accept = "application/json"
+  }
+}

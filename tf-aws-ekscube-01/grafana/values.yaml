@@ -1,0 +1,60 @@
+# Namespace는 helm install 시 지정 (예: monitoring)
+
+# Prometheus 설정
+prometheus:
+  service:
+    type: ClusterIP
+  serviceAccount:
+    create: true
+    name: prometheus-sa
+  ingress:
+    enabled: true
+    ingressClassName: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+    hosts: []
+    paths:
+      - /
+
+  # PVC 설정 (EBS CSI Driver 필요)
+  prometheusSpec:
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+          storageClassName: gp2  # 또는 gp3
+
+# Grafana 설정
+grafana:
+  adminUser: admin
+  adminPassword: "*rkdwls80!"
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: true
+    ingressClassName: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+    hosts:
+      []
+    paths:
+      - /
+
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClassName: gp2
+
+# Alertmanager 설정
+alertmanager:
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: false  # 필요 시 true로 변경
+
+# kube-state-metrics
+kube-state-metrics:
+  enabled: true

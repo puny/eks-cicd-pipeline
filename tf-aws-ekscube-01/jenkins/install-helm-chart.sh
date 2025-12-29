@@ -1,3 +1,5 @@
 #!/bin/bash
 
-helm install jenkins -n jenkins -f 04-values.yaml jenkins/jenkins
+kcns jenkins
+
+helm install jenkins -n jenkins -f jenkins-values.yaml jenkins/jenkins

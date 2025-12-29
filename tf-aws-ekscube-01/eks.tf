@@ -9,9 +9,36 @@ module "eks" {
   kubernetes_version  = var.eks_cluster_version
   subnet_ids          = module.vpc.private_subnets
   vpc_id              = module.vpc.vpc_id
+
   # configmap & api 
   authentication_mode   = "API"
   # authentication_mode = "API_AND_CONFIG_MAP"
+
+  # eks cluster access entry 정의
+  access_entries = {
+    # 사용자 식별자 (임의 지정 가능)
+    puny_user = {
+      principal_arn     = "arn:aws:iam::813307607383:user/puny"
+      type              = "STANDARD"
+
+      policy_associations = {
+        # 1. Cluster Admin 정책 (클러스터 전체 제어)
+        cluster_admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+        # 2. Admin 정책 (일반적인 관리 권한)
+        admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+  }
 
   # service account 직접정의
   /* 
@@ -38,7 +65,7 @@ module "eks" {
     vpc-cni                = {
       before_compute = true
       most_recent = true
-    }
+    }  
   }
   
   # IRSA 활성화
@@ -75,7 +102,7 @@ module "eks" {
 
       desired_size = 1
       min_size = 1
-      max_size = 3
+      max_size = 5
 
       ami_type       = "AL2023_x86_64_STANDARD"
       instance_types = [var.instance_type]
@@ -93,6 +120,42 @@ module "eks" {
     cost = var.eks_cluster_name
   }
 }
+
+# 이거 제대로 되지 않은거 같아서 확인 해봐야함
+module "eks_load_balancer_controller" {
+  depends_on = [module.eks]
+
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
+  version = "~> 6.2.3"
+
+  name = "aws-load-balancer-controller"
+  
+  # 해당 Role을 사용할 Service Account 지정 (namespace:name 형식)
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["default:aws-load-balancer-controller"]
+    }
+  }
+
+  # 권한 정책 (예: S3 읽기 전용)
+  policies = {
+    policy = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+  }
+
+}
+
+
+# resource "aws_iam_policy" "load_balancer_controller" {
+#   name        = "AWSLoadBalancerControllerIAMPolicy"
+#   path        = "/"
+#   description = "IAM policy for AWS Load Balancer Controller (v2.13.3)"
+
+#   # data.http를 통해 받은 응답의 body를 정책으로 사용
+#   policy = data.http.lb_controller_policy_json.response_body
+# }
+
+
 
 resource "null_resource" "update_kubeconfig" {
   depends_on = [module.eks]
