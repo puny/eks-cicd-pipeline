@@ -2,7 +2,7 @@
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 21.0.4"
+  version = "~> 21.14.0"
 
   name                = var.eks_cluster_name
   iam_role_arn        = aws_iam_role.eks_cluster_role.arn
@@ -102,7 +102,7 @@ module "eks" {
 
       desired_size = 1
       min_size = 1
-      max_size = 5
+      max_size = 3
 
       ami_type       = "AL2023_x86_64_STANDARD"
       instance_types = [var.instance_type]
@@ -126,7 +126,7 @@ module "eks_load_balancer_controller" {
   depends_on = [module.eks]
 
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
-  version = "~> 6.2.3"
+  version = "~> 6.3.0"
 
   name = "aws-load-balancer-controller"
   
