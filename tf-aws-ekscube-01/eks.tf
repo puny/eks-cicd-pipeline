@@ -65,6 +65,10 @@ module "eks" {
     vpc-cni                = {
       before_compute = true
       most_recent = true
+    }
+    # aws ebs csi driver addon 추가
+    aws-ebs-csi-driver = {
+      service_account_role_arn = module.ebs_csi_driver_irsa.arn
     }  
   }
   
@@ -111,13 +115,14 @@ module "eks" {
         Name = "${var.eks_cluster_name}-node"
         cost = "${var.eks_cluster_name}-node"
         changed_by = "terraform"
+        deploy = "true"
       }
     }
   }
 
   tags = {
     Name = var.eks_cluster_name
-    cost = var.eks_cluster_name
+    cost = var.eks_cluster_name    
   }
 }
 
@@ -156,6 +161,27 @@ module "eks_load_balancer_controller" {
 # }
 
 
+# eks aws controller for kubernetes s3
+/*
+module "eks-ack-addons" {
+  depends_on = [module.eks]
+
+  source  = "aws-ia/eks-ack-addons/aws"
+  version = "3.0.3"
+  # insert the 3 required variables here
+
+  cluster_name        = "${var.eks_cluster_name}"
+  cluster_endpoint    = "${module.eks.cluster_endpoint}"
+  oidc_provider_arn   = "${module.eks.oidc_provider_arn}"
+
+  enable_s3       = true
+
+  tags = {
+    Name = "${var.eks_cluster_name}-ack-addon"
+    cost = "${var.eks_cluster_name}-ack-addon"
+  }
+}
+*/
 
 resource "null_resource" "update_kubeconfig" {
   depends_on = [module.eks]
@@ -163,5 +189,48 @@ resource "null_resource" "update_kubeconfig" {
   provisioner "local-exec" {
     command = "aws eks update-kubeconfig --name ${var.eks_cluster_name} --region ${var.aws_region}"
     interpreter = ["/bin/bash", "-c"]
+  }
+}
+
+module "karpenter" {
+  source = "terraform-aws-modules/eks/aws//modules/karpenter"
+
+  cluster_name = module.eks.cluster_name
+
+  # Attach additional IAM policies to the Karpenter node IAM role
+  node_iam_role_additional_policies = {
+    AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  }
+
+  tags = {
+    Name = "eks-cicd-cluster-module-karpenter"
+    cost = "eks-cicd-cluster-module-karpenter"
+    Environment = "dev"
+    Terraform   = "true"
+  }
+}
+
+
+# ebs csi driver addon
+module "ebs_csi_driver_irsa" {
+  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
+  version = "6.3.0"
+
+  name = "ebs-csi"
+
+  attach_ebs_csi_policy = true
+
+  oidc_providers = {
+    this = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+    }
+  }
+
+  tags = {
+    Name = "eks-cicd-cluster-ebs-csi-driver-irsa"
+    cost = "eks-cicd-cluster-ebs-csi-driver-irsa"
+    Terraform   = "true"
+    Environment = "dev"
   }
 }
