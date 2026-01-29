@@ -18,7 +18,8 @@ module "eks" {
   access_entries = {
     # 사용자 식별자 (임의 지정 가능)
     puny_user = {
-      principal_arn     = "arn:aws:iam::813307607383:user/puny"
+      # principal_arn     = "arn:aws:iam::813307607383:user/puny"
+      principal_arn     = "arn:aws:iam::${var.aws_account_id}:user/puny"
       type              = "STANDARD"
 
       policy_associations = {
