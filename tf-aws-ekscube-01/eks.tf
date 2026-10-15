@@ -110,7 +110,7 @@ module "eks" {
       max_size = 3
 
       ami_type       = "AL2023_x86_64_STANDARD"
-      instance_types = [var.instance_type]
+      instance_types = var.instance_types
       capacity_type  = "SPOT"
       tags = {
         Name = "${var.eks_cluster_name}-node"

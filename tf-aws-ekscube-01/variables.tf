@@ -40,9 +40,10 @@ variable "private_subnets" {
   type        = list(string)
 }
 
-variable "instance_type" {
+variable "instance_types" {
   description = "Instance Type for EKS Nodes"
-  type        = string
+  type        = list(string)
+  default     = ["t3a.medium", "t3a.large"]
 }
 
 
