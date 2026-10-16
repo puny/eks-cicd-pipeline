@@ -197,6 +197,9 @@ module "karpenter" {
   source = "terraform-aws-modules/eks/aws//modules/karpenter"
 
   cluster_name = module.eks.cluster_name
+  
+  # enable_inline_policy false 일경우 IAM 정책 생성할때 6,144자 제한있음
+  enable_inline_policy = true
 
   # Attach additional IAM policies to the Karpenter node IAM role
   node_iam_role_additional_policies = {
