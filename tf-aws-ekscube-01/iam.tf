@@ -1,5 +1,5 @@
 
-
+/*
 resource "aws_iam_role" "eks_admin_role" {
   name = "eks-admin-role"
 
@@ -21,6 +21,7 @@ resource "aws_iam_role_policy_attachment" "eks_admin_attach" {
   role       = aws_iam_role.eks_admin_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
+*/
 
 resource "aws_iam_role" "eks_cluster_role" {
   name = "${var.eks_cluster_name}-eks-cluster-role"

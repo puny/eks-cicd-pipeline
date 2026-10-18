@@ -4,14 +4,14 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 21.14.0"
 
-  name                = var.eks_cluster_name
-  iam_role_arn        = aws_iam_role.eks_cluster_role.arn
-  kubernetes_version  = var.eks_cluster_version
-  subnet_ids          = module.vpc.private_subnets
-  vpc_id              = module.vpc.vpc_id
+  name               = var.eks_cluster_name
+  iam_role_arn       = aws_iam_role.eks_cluster_role.arn
+  kubernetes_version = var.eks_cluster_version
+  subnet_ids         = module.vpc.private_subnets
+  vpc_id             = module.vpc.vpc_id
 
   # configmap & api 
-  authentication_mode   = "API"
+  authentication_mode = "API"
   # authentication_mode = "API_AND_CONFIG_MAP"
 
   # eks cluster access entry 정의
@@ -19,8 +19,8 @@ module "eks" {
     # 사용자 식별자 (임의 지정 가능)
     puny_user = {
       # principal_arn     = "arn:aws:iam::813307607383:user/puny"
-      principal_arn     = "arn:aws:iam::${var.aws_account_id}:user/puny"
-      type              = "STANDARD"
+      principal_arn = "arn:aws:iam::${var.aws_account_id}:user/puny"
+      type          = "STANDARD"
 
       policy_associations = {
         # 1. Cluster Admin 정책 (클러스터 전체 제어)
@@ -31,6 +31,26 @@ module "eks" {
           }
         }
         # 2. Admin 정책 (일반적인 관리 권한)
+        admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+
+    eks_cluster_role = {
+      principal_arn = data.aws_iam_role.eks_admin_role.arn
+      type          = "STANDARD"
+
+      policy_associations = {
+        cluster_admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
         admin = {
           policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminPolicy"
           access_scope = {
@@ -51,32 +71,32 @@ module "eks" {
       role_name_prefix = "alb-controller-"
     } 
   } */
-    
+
   addons = {
-    coredns                = {
+    coredns = {
       most_recent = true
     }
     eks-pod-identity-agent = {
       before_compute = true
-      most_recent = true      
+      most_recent    = true
     }
-    kube-proxy             = {
+    kube-proxy = {
       most_recent = true
     }
-    vpc-cni                = {
+    vpc-cni = {
       before_compute = true
-      most_recent = true
+      most_recent    = true
     }
     # aws ebs csi driver addon 추가
     aws-ebs-csi-driver = {
       service_account_role_arn = module.ebs_csi_driver_irsa.arn
-    }  
+    }
   }
-  
+
   # IRSA 활성화
   # OIDC provider 자동으로 생성됨
   enable_irsa = true
-  
+
   # Optional
   endpoint_public_access = true
   # endpoint_public_access_cidrs = [ "0.0.0.0/0" ]
@@ -102,28 +122,28 @@ module "eks" {
 
   eks_managed_node_groups = {
     nodes = {
-      
+
       iam_role_arn = aws_iam_role.eks_node_role.arn
 
       desired_size = 1
-      min_size = 1
-      max_size = 3
+      min_size     = 1
+      max_size     = 3
 
       ami_type       = "AL2023_x86_64_STANDARD"
       instance_types = var.instance_types
       capacity_type  = "SPOT"
       tags = {
-        Name = "${var.eks_cluster_name}-node"
-        cost = "${var.eks_cluster_name}-node"
+        Name       = "${var.eks_cluster_name}-node"
+        cost       = "${var.eks_cluster_name}-node"
         changed_by = "terraform"
-        deploy = "true"
+        deploy     = "true"
       }
     }
   }
 
   tags = {
     Name = var.eks_cluster_name
-    cost = var.eks_cluster_name    
+    cost = var.eks_cluster_name
   }
 }
 
@@ -135,7 +155,7 @@ module "eks_load_balancer_controller" {
   version = "~> 6.3.0"
 
   name = "aws-load-balancer-controller"
-  
+
   # 해당 Role을 사용할 Service Account 지정 (namespace:name 형식)
   oidc_providers = {
     main = {
@@ -188,7 +208,7 @@ resource "null_resource" "update_kubeconfig" {
   depends_on = [module.eks]
 
   provisioner "local-exec" {
-    command = "aws eks update-kubeconfig --name ${var.eks_cluster_name} --region ${var.aws_region}"
+    command     = "aws eks update-kubeconfig --name ${var.eks_cluster_name} --region ${var.aws_region}"
     interpreter = ["/bin/bash", "-c"]
   }
 }
@@ -197,7 +217,7 @@ module "karpenter" {
   source = "terraform-aws-modules/eks/aws//modules/karpenter"
 
   cluster_name = module.eks.cluster_name
-  
+
   # enable_inline_policy false 일경우 IAM 정책 생성할때 6,144자 제한있음
   enable_inline_policy = true
 
@@ -207,8 +227,8 @@ module "karpenter" {
   }
 
   tags = {
-    Name = "eks-cicd-cluster-module-karpenter"
-    cost = "eks-cicd-cluster-module-karpenter"
+    Name        = "eks-cicd-cluster-module-karpenter"
+    cost        = "eks-cicd-cluster-module-karpenter"
     Environment = "dev"
     Terraform   = "true"
   }
@@ -217,7 +237,7 @@ module "karpenter" {
 
 # ebs csi driver addon
 module "ebs_csi_driver_irsa" {
-  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
   version = "6.3.0"
 
   name = "ebs-csi"
@@ -232,8 +252,8 @@ module "ebs_csi_driver_irsa" {
   }
 
   tags = {
-    Name = "eks-cicd-cluster-ebs-csi-driver-irsa"
-    cost = "eks-cicd-cluster-ebs-csi-driver-irsa"
+    Name        = "eks-cicd-cluster-ebs-csi-driver-irsa"
+    cost        = "eks-cicd-cluster-ebs-csi-driver-irsa"
     Terraform   = "true"
     Environment = "dev"
   }

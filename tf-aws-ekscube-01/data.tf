@@ -6,17 +6,21 @@ data "aws_eks_cluster_auth" "cluster" {
   name = module.eks.cluster_name
 }
 
+data "aws_iam_role" "eks_admin_role" {
+  name = "air-dev-assume-eks-admin-role"
+}
+
 data "aws_iam_policy_document" "alb_controller_assume_role" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
     principals {
-      type = "Federated"
+      type        = "Federated"
       identifiers = [module.eks.oidc_provider_arn]
     }
     condition {
-      test = "StringEquals"
+      test     = "StringEquals"
       variable = "${replace(module.eks.oidc_provider, "https://", "")}:sub"
-      values = ["system:serviceaccount:kube-system:aws-load-balancer-controller"]
+      values   = ["system:serviceaccount:kube-system:aws-load-balancer-controller"]
     }
   }
 }
