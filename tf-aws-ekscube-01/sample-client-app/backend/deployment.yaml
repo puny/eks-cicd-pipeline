@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-lottery-backend
+  namespace: sample-client-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sample-lottery-backend
+  template:
+    metadata:
+      labels:
+        app: sample-lottery-backend
+    spec:
+      containers:
+        - name: backend          
+          image: 813307607383.dkr.ecr.ap-northeast-2.amazonaws.com/sample-lottery-backend:1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sample-lottery-backend
+  namespace: sample-client-app
+spec:
+  type: ClusterIP
+  selector:
+    app: sample-lottery-backend
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sample-lottery-backend
+  namespace: sample-client-app
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/group.name: sample-lottery-app
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: sample-lottery-backend
+                port:
+                  number: 8080

@@ -17,7 +17,7 @@ variable "eks_cluster_name" {
 variable "eks_cluster_version" {
     description = "Version of the EKS cluster"
     type        = string
-    default     = "1.28"
+    default     = "1.37"
 }
 
 variable "vpc_name" {
