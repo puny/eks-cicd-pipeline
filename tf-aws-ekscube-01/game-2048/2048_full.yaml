@@ -48,14 +48,14 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/tags: cost=eks-cicd-cluster-game-2048-ingress,Name=eks-cicd-cluster-game-2048-ingress
+    alb.ingress.kubernetes.io/group.name: sample-group
     
 spec:
   ingressClassName: alb  
   rules:
     - http:
         paths:
-        - path: /
+        - path: /2048
           pathType: Prefix
           backend:
             service:

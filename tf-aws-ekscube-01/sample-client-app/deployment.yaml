@@ -148,13 +148,14 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/healthcheck-path: /
-    alb.ingress.kubernetes.io/group.name: sample-lottery-app
+    alb.ingress.kubernetes.io/group.name: sample-group
+    alb.ingress.kubernetes.io/tags: cost=eks-sample-client-app,Name=eks-sample-client-app
 spec:
   ingressClassName: alb
   rules:
     - http:
         paths:
-          - path: /
+          - path: /lottery
             pathType: Prefix
             backend:
               service:
