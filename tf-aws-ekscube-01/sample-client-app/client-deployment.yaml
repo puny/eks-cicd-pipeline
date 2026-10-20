@@ -1,0 +1,171 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sample-client-app
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sample-client-app
+  namespace: sample-client-app
+data:
+  index.html: |
+    <!doctype html>
+    <html lang="ko">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>EKS 샘플 클라이언트</title>
+      <style>
+        :root { color-scheme: dark; font-family: system-ui, sans-serif; }
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 15% 15%, #1b4565, #101827 55%); color: #edf5ff; }
+        main { width: min(760px, 100%); }
+        .eyebrow { color: #69d6c2; font-size: .8rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+        h1 { margin: 12px 0; font-size: clamp(2.3rem, 8vw, 4.5rem); line-height: 1.03; }
+        p { color: #afc2d6; line-height: 1.7; }
+        .card { margin-top: 32px; padding: 24px; border: 1px solid #29425b; border-radius: 18px; background: #142237cc; box-shadow: 0 24px 80px #0005; }
+        .status { display: inline-flex; align-items: center; gap: 9px; color: #a9f3d7; font-weight: 650; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #42d69b; box-shadow: 0 0 14px #42d69b; }
+        code { color: #8ce5d4; }
+      </style>
+    </head>
+    <body>
+      <main>
+        <div class="eyebrow">EKS · Sample Client</div>
+        <h1>배포가<br>잘 됐어요.</h1>
+        <p>버튼을 누르면 백엔드가 1부터 45까지 숫자 중 6개를 뽑아 돌려줍니다.</p>
+        <section class="card">
+          <div class="status"><span class="dot"></span> 클라이언트 앱 실행 중</div>
+          <p>네임스페이스 <code>sample-client-app</code> · 컨테이너 <code>nginx</code></p>
+          <button id="draw" type="button">번호 뽑기</button>
+          <p id="result-status" aria-live="polite">버튼을 눌러 번호를 받아보세요.</p>
+          <div id="numbers" class="numbers" aria-label="추첨 결과"></div>
+          <style>
+            button { margin-top: 12px; padding: 12px 18px; border: 0; border-radius: 10px; background: #69d6c2; color: #102033; font: inherit; font-weight: 700; cursor: pointer; }
+            button:disabled { opacity: .6; cursor: wait; }
+            #result-status { min-height: 28px; margin-bottom: 4px; }
+            .numbers { display: flex; flex-wrap: wrap; min-height: 50px; align-items: center; }
+            .ball { display: inline-grid; place-items: center; width: 38px; height: 38px; margin: 4px 5px 0 0; border-radius: 50%; background: #234664; color: #fff; font-weight: 700; animation: ball-in 420ms both; }
+            @keyframes ball-in { from { opacity: 0; transform: translateY(10px) scale(.82); } to { opacity: 1; transform: translateY(0) scale(1); } }
+            @media (prefers-reduced-motion: reduce) { .ball { animation: none; } }
+          </style>
+          <script>
+            const button = document.querySelector('#draw');
+            const status = document.querySelector('#result-status');
+            const numbers = document.querySelector('#numbers');
+            button.addEventListener('click', async () => {
+              button.disabled = true;
+              status.textContent = '백엔드에서 번호를 만드는 중…';
+              try {
+                const response = await fetch('/api/lotto');
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                numbers.replaceChildren(...data.numbers.map((number, index) => {
+                  const ball = document.createElement('span');
+                  ball.className = 'ball';
+                  ball.textContent = number;
+                  ball.style.animationDelay = `${index * 70}ms`;
+                  return ball;
+                }));
+                status.textContent = '새 번호를 받았습니다.';
+              } catch (error) {
+                status.textContent = `백엔드 요청에 실패했습니다: ${error.message}`;
+              } finally {
+                button.disabled = false;
+              }
+            });
+          </script>
+        </section>
+      </main>
+    </body>
+    </html>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-client-app
+  namespace: sample-client-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sample-client-app
+  template:
+    metadata:
+      labels:
+        app: sample-client-app
+    spec:
+      containers:
+        - name: nginx
+          image: public.ecr.aws/nginx/nginx:1.27-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 64Mi
+          volumeMounts:
+            - name: web-content
+              mountPath: /usr/share/nginx/html/lottery
+              readOnly: true
+      volumes:
+        - name: web-content
+          configMap:
+            name: sample-client-app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sample-client-app
+  namespace: sample-client-app
+spec:
+  type: ClusterIP
+  selector:
+    app: sample-client-app
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sample-client-app
+  namespace: sample-client-app
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/group.name: sample-group
+    alb.ingress.kubernetes.io/tags: cost=eks-sample-client-app,Name=eks-sample-client-app
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /lottery
+            pathType: Prefix
+            backend:
+              service:
+                name: sample-client-app
+                port:
+                  number: 80
